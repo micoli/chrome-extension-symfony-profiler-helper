@@ -25,10 +25,21 @@
     }
   },
   "rules": {
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "no-multi-spaces": ["error"],
+
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "@typescript-eslint/indent": ["error", 2, { "SwitchCase": 1 }],
+
+    "semi": ["error", "always", { "omitLastInOneLineBlock": true }],
+    "@typescript-eslint/semi": ["error", "always", { "omitLastInOneLineBlock": true }],
+
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/strict-boolean-expressions": "off"
   },
   "globals": {
     "chrome": "readonly"
   },
   "ignorePatterns": ["watch.js", "dist/**"]
+
 }

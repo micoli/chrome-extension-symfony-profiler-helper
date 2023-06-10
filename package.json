@@ -1,7 +1,7 @@
 {
-  "name": "chrome-extension-boilerplate-react-vite",
+  "name": "Symfony-Profiler-Helper",
   "version": "0.0.1",
-  "description": "chrome extension boilerplate",
+  "description": "Log and display each request container X-Debug-Link",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -17,8 +17,22 @@
   },
   "type": "module",
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@mantine/core": "^6.0.13",
+    "@mantine/form": "^6.0.13",
+    "@mantine/hooks": "^6.0.13",
+    "@tabler/icons-react": "^2.22.0",
+    "@webext-core/messaging": "^1.4.0",
+    "@webext-core/storage": "^1.1.2",
+    "curl-generator": "^0.3.1",
+    "jwt-decode": "^3.1.2",
+    "lodash": "^4.17.21",
+    "mantine-datatable": "^2.5.9",
+    "mantine-react-table": "^1.0.0-beta.8",
+    "moment": "^2.29.4",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-json-pretty": "^2.2.0"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.5.0",
