@@ -17,6 +17,11 @@
   },
   "type": "module",
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@mantine/core": "^6.0.13",
+    "@mantine/hooks": "^6.0.13",
+    "@tabler/icons-react": "^2.22.0",
+    "mantine-react-table": "^1.0.0-beta.8",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },

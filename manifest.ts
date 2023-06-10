@@ -11,14 +11,23 @@ const manifest: chrome.runtime.ManifestV3 = {
   options_page: "src/pages/options/index.html",
   background: {
     service_worker: "src/pages/background/index.js",
-    type: "module",
+    type: "module"
   },
+  permissions:[
+    'webRequest',
+    "activeTab",
+    "tabs",
+    "webRequest",
+    "webNavigation",
+    "management",
+    "scripting",
+    "favicon",
+    "storage"
+  ],
+  host_permissions:['<all_urls>'],
   action: {
     default_popup: "src/pages/popup/index.html",
     default_icon: "icon-34.png",
-  },
-  chrome_url_overrides: {
-    newtab: "src/pages/newtab/index.html",
   },
   icons: {
     "128": "icon-128.png",
@@ -40,7 +49,8 @@ const manifest: chrome.runtime.ManifestV3 = {
         "icon-128.png",
         "icon-34.png",
       ],
-      matches: ["*://*/*"],
+      matches: ["<all_urls>"],
+      //matches: ["*://*/*"],
     },
   ],
 };
