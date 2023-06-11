@@ -2,6 +2,7 @@ import { RequestLog, XDebugData } from "../shared";
 import reloadOnUpdate from "virtual:reload-on-update-in-background-script";
 import HttpHeader = chrome.webRequest.HttpHeader;
 import { sendMessage, onMessage } from "../shared/messaging";
+import BlockingResponse = chrome.webRequest.BlockingResponse;
 
 reloadOnUpdate("pages/background");
 reloadOnUpdate("pages/content/style.scss");
@@ -39,7 +40,7 @@ const onWebRequestBeforeRequest = (details) => {
   );
 };
 
-const onWebRequestBeforeSendHeaders = async (details) => {
+const onWebRequestBeforeSendHeaders = (details): void | BlockingResponse => {
   try {
     if (!bufferRequests.has(details.requestId)) {
       return;
@@ -64,9 +65,11 @@ const onWebRequestCompleted = async (details) => {
       bufferRequests.delete(details.requestId);
       return;
     }
+    console.log(details);
     const requestLog = bufferRequests.get(details.requestId);
     requestLog.onComplete(
       details.statusCode,
+      details.responseText,
       details.responseHeaders,
       details.timeStamp,
       xDebugData
@@ -110,8 +113,7 @@ const initBackground = () => {
   );
 
   onMessage("getLogs", (): RequestLog[] => {
-    console.log("background logs");
-    return Array.from(logs, ([name, value]) => value);
+    return Array.from(logs, ([, value]) => value);
   });
 
   onMessage("clear", () => {

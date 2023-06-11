@@ -1,3 +1,5 @@
+import HttpHeader = chrome.webRequest.HttpHeader;
+
 export interface XDebugData {
   link: string;
   token: string;
@@ -21,9 +23,10 @@ export class RequestLog {
   url: string;
   timestampStart: number;
   body: any;
+  response: any;
   status: number = null;
-  requestHeaders: any;
-  responseHeaders: any;
+  requestHeaders: HttpHeader[];
+  responseHeaders: HttpHeader[];
   timestampEnd: number;
   xDebugData: XDebugData;
 
@@ -39,8 +42,9 @@ export class RequestLog {
     this.requestHeaders = requestHeaders;
   }
 
-  onComplete(status, responseHeaders, timestampEnd, xDebugData) {
+  onComplete(status, response, responseHeaders, timestampEnd, xDebugData) {
     this.status = status;
+    this.response = response;
     this.responseHeaders = responseHeaders;
     this.timestampEnd = timestampEnd;
     this.xDebugData = xDebugData;
