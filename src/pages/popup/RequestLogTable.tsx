@@ -27,14 +27,8 @@ const RequestLogTable = () => {
   const [logs, setLogs] = useState<RequestLog[]>([]);
 
   useEffect(() => {
-    console.log("start");
-
     onMessage("newRequest", (message) => {
       setLogs((previousLogs) => [message.data, ...previousLogs]);
-    });
-
-    onMessage("popupClick", (message) => {
-      refresh().then();
     });
 
     refresh().then();
@@ -72,6 +66,23 @@ const RequestLogTable = () => {
               onClick={clearLogs}
             >
               Clear
+            </Button>
+
+            <Button
+              size="xs"
+              variant="outline"
+              color="lightblue"
+              onClick={() => sendMessage("stopListeners", null).then()}
+            >
+              pause
+            </Button>
+            <Button
+              size="xs"
+              variant="outline"
+              color="lightblue"
+              onClick={() => sendMessage("startListeners", null).then()}
+            >
+              play
             </Button>
 
             <Text>{logs.length}</Text>

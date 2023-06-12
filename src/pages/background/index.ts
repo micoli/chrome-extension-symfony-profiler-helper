@@ -9,6 +9,7 @@ reloadOnUpdate("pages/content/style.scss");
 
 const logs: Map<string, RequestLog> = new Map<string, RequestLog>();
 const bufferRequests: Map<string, RequestLog> = new Map<string, RequestLog>();
+let listenersStarted = true;
 
 const getDebugToken = (headers: HttpHeader[]): XDebugData | null => {
   const result = { link: null, token: null };
@@ -24,10 +25,25 @@ const getDebugToken = (headers: HttpHeader[]): XDebugData | null => {
 };
 
 const updateBadgeIcon = () => {
-  chrome.action.setBadgeText({ text: `${logs.size}` });
+  chrome.action.setBadgeText({
+    text: `${logs.size} ${listenersStarted ? "1" : "0"}`,
+  });
 };
 
+const decodeRawBody = (raw): any =>
+  decodeURIComponent(
+    String.fromCharCode.apply(null, new Uint8Array(raw[0].bytes))
+  );
+
 const onWebRequestBeforeRequest = (details) => {
+  const body = {
+    formData: details.requestBody?.formData ?? null,
+    raw: details.requestBody?.raw
+      ? decodeRawBody(details.requestBody.raw)
+      : null,
+  };
+
+  // console.log("body", body);
   bufferRequests.set(
     details.requestId,
     new RequestLog(
@@ -35,7 +51,7 @@ const onWebRequestBeforeRequest = (details) => {
       details.method,
       details.url,
       details.timeStamp,
-      details.requestBody
+      body
     )
   );
 };
@@ -55,7 +71,7 @@ const onWebRequestBeforeSendHeaders = (details): void | BlockingResponse => {
 
 const onWebRequestCompleted = async (details) => {
   try {
-    console.log("worker onCompleted");
+    //console.log("worker onCompleted");
     if (!bufferRequests.has(details.requestId)) {
       return;
     }
@@ -65,7 +81,7 @@ const onWebRequestCompleted = async (details) => {
       bufferRequests.delete(details.requestId);
       return;
     }
-    console.log(details);
+    //console.log(details);
     const requestLog = bufferRequests.get(details.requestId);
     requestLog.onComplete(
       details.statusCode,
@@ -74,51 +90,70 @@ const onWebRequestCompleted = async (details) => {
       details.timeStamp,
       xDebugData
     );
-    console.log("worker onCompleted sent");
+    //console.log("worker onCompleted sent");
     bufferRequests.delete(details.requestId);
     logs.set(details.requestId, requestLog);
     updateBadgeIcon();
     sendMessage("newRequest", requestLog).catch(() => {
-      console.log("Popup not available now");
+      //console.log("Popup not available now");
     });
   } catch (error) {
     console.log(error);
   }
 };
 
-const initBackground = () => {
+function activateListeners(activate: boolean) {
+  listenersStarted = activate;
+  if (!activate) {
+    chrome.webRequest.onBeforeRequest.removeListener(onWebRequestBeforeRequest);
+    chrome.webRequest.onBeforeSendHeaders.removeListener(
+      onWebRequestBeforeSendHeaders
+    );
+    chrome.webRequest.onCompleted.removeListener(onWebRequestCompleted);
+    return;
+  }
+  const filter = {
+    urls: ["<all_urls>"],
+    types: ["xmlhttprequest", "main_frame"],
+  };
   chrome.webRequest.onBeforeRequest.addListener(
     onWebRequestBeforeRequest,
-    {
-      urls: ["<all_urls>"],
-      types: ["xmlhttprequest", "main_frame"],
-    },
+    filter,
     ["extraHeaders", "requestBody"]
   );
   chrome.webRequest.onBeforeSendHeaders.addListener(
     onWebRequestBeforeSendHeaders,
-    {
-      urls: ["<all_urls>"],
-      types: ["xmlhttprequest", "main_frame"],
-    },
+    filter,
     ["requestHeaders"]
   );
-  chrome.webRequest.onCompleted.addListener(
-    onWebRequestCompleted,
-    {
-      urls: ["<all_urls>"],
-      types: ["xmlhttprequest", "main_frame"],
-    },
-    ["responseHeaders"]
-  );
+  chrome.webRequest.onCompleted.addListener(onWebRequestCompleted, filter, [
+    "responseHeaders",
+  ]);
+}
+
+const initBackground = () => {
+  activateListeners(true);
 
   onMessage("getLogs", (): RequestLog[] => {
     return Array.from(logs, ([, value]) => value);
   });
 
+  onMessage("getListenersStatus", (): boolean => {
+    return listenersStarted;
+  });
+
   onMessage("clear", () => {
-    console.log("background clear");
     logs.clear();
+    updateBadgeIcon();
+  });
+
+  onMessage("startListeners", () => {
+    activateListeners(true);
+    updateBadgeIcon();
+  });
+
+  onMessage("stopListeners", () => {
+    activateListeners(false);
     updateBadgeIcon();
   });
 

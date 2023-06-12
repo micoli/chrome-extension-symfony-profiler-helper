@@ -3,6 +3,7 @@ import "@pages/popup/Popup.css";
 import "react-json-pretty/themes/monikai.css";
 import { Tabs } from "@mantine/core";
 import { RequestLog } from "../shared";
+import { Text } from "@mantine/core";
 import {
   IconMessageCircle,
   IconPhoto,
@@ -37,14 +38,27 @@ const ExpandedRow = ({ record }: { record: RequestLog }) => {
         <RequestDetail record={record} />
       </Tabs.Panel>
       <Tabs.Panel value="body" pt="xs">
-        {JSON.stringify(record.body)}
-        {record.body === undefined && <Fragment>No Body</Fragment>}
+        {record.body.formData && (
+          <Fragment>
+            <Text>Form Data</Text>
+            <JsonDisplay data={record.body.formData} />
+          </Fragment>
+        )}
+        {record.body.raw && (
+          <Fragment>
+            <Text>Raw</Text>
+            <JsonDisplay data={record.body.raw} />
+          </Fragment>
+        )}
+        {record.body.formData === null && record.body.raw === null && (
+          <Fragment>No Body</Fragment>
+        )}
       </Tabs.Panel>
       <Tabs.Panel value="requestHeaders" pt="xs">
         <RequestHeaders headers={record.requestHeaders} />
       </Tabs.Panel>
       <Tabs.Panel value="response" pt="xs">
-        <JsonDisplay data={record.response} />
+        Response
       </Tabs.Panel>
       <Tabs.Panel value="responseHeaders" pt="xs">
         <RequestHeaders headers={record.responseHeaders} />

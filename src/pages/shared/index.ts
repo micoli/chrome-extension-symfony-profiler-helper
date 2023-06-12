@@ -5,24 +5,17 @@ export interface XDebugData {
   token: string;
 }
 
+export interface RequestBody {
+  formData: any | null;
+  raw: any | null;
+}
+
 export class RequestLog {
   requestId: string;
-  method:
-    | "OPTIONS"
-    | "options"
-    | "GET"
-    | "get"
-    | "POST"
-    | "post"
-    | "PUT"
-    | "put"
-    | "PATCH"
-    | "patch"
-    | "DELETE"
-    | "delete";
+  method: string;
   url: string;
   timestampStart: number;
-  body: any;
+  body: RequestBody;
   response: any;
   status: number = null;
   requestHeaders: HttpHeader[];

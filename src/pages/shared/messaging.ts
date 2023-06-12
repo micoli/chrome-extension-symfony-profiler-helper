@@ -4,11 +4,15 @@ import { defineExtensionMessaging } from "@webext-core/messaging";
 interface ProtocolMap {
   getLogs(): RequestLog[];
 
+  getListenersStatus(): boolean;
+
   clear(): void;
 
   newRequest(RequestLog): void;
 
-  popupClick(): void;
+  stopListeners(): void;
+
+  startListeners(): void;
 }
 
 export const { sendMessage, onMessage } =
