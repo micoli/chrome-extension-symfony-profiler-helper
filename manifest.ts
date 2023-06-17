@@ -1,4 +1,5 @@
 import packageJson from "./package.json";
+import * as process from "process";
 
 /**
  * After changing, please reload the extension at `chrome://extensions`
@@ -6,7 +7,8 @@ import packageJson from "./package.json";
 const manifest: chrome.runtime.ManifestV3 = {
   manifest_version: 3,
   name: packageJson.name,
-  version: packageJson.version,
+  version:
+    process.env["steps.taggerDryRun.outputs.new_tag"] || packageJson.version,
   description: packageJson.description,
   icons: {
     "48": "symfony-color-48.png",

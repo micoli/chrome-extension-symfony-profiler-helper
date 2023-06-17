@@ -25,8 +25,46 @@ jobs:
 
       - run: yarn install
 
+
+      - name: Minor version for each merge
+        id: taggerDryRun
+        uses: anothrNick/github-tag-action@1.36.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DRY_RUN: true
+
       - run: yarn build
+
+      - run: yarn run build-extension
 
       - uses: actions/upload-artifact@v3
         with:
           path: dist/*
+          name: extension.zip
+          if-no-files-found: error
+
+      - name: Minor version for each merge on master
+        id: taggerFinal
+        uses: anothrNick/github-tag-action@1.36.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+
+      - name: Display manifest
+        run: cat dist/manifest.json
+        shell: bash
+
+      - name: Display manifest
+        run: yarn run
+        shell: bash
+
+      - name: Upload & release
+        when:
+        uses: mnao305/chrome-extension-upload@v4.0.1
+        with:
+          file-path: dist/extension.zip
+          extension-id: hogefuga(extension id)
+          client-id: ${{ secrets.PUBLISH_CLIENT_ID }}
+          client-secret: ${{ secrets.PUBLISH_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.PUBLISH_REFRESH_TOKEN }}
