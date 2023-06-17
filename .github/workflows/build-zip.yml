@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -59,7 +58,6 @@ jobs:
         shell: bash
 
       - name: Upload & release
-        when:
         uses: mnao305/chrome-extension-upload@v4.0.1
         with:
           file-path: dist/extension.zip
