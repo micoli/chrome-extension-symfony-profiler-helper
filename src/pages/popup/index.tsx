@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "@pages/popup/index.css";
-import Popup from "@pages/popup/Popup";
+import LogList from "@pages/shared/LogList/LogList";
 import { MantineProvider } from "@mantine/core";
 import refreshOnUpdate from "virtual:reload-on-update-in-view";
 
@@ -20,7 +20,7 @@ function init() {
       withGlobalStyles
       withNormalizeCSS
     >
-      <Popup />
+      <LogList height={500} />
     </MantineProvider>
   );
 }

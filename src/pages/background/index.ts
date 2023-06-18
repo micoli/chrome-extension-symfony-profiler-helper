@@ -4,7 +4,11 @@ import HttpHeader = chrome.webRequest.HttpHeader;
 import { sendMessage, onMessage } from "../shared/messaging";
 import BlockingResponse = chrome.webRequest.BlockingResponse;
 import ResourceType = chrome.webRequest.ResourceType;
-import { storageGetItem, storageKeys } from "@pages/shared/storage";
+import {
+  storageGetItem,
+  storageKeys,
+  storageSetItem,
+} from "@pages/shared/storage";
 
 reloadOnUpdate("pages/background");
 
@@ -45,7 +49,7 @@ const updateBadgeIcon = () => {
   });
 };
 
-const decodeRawBody = (raw): any =>
+const decodeRawBody = (raw): string =>
   decodeURIComponent(
     String.fromCharCode.apply(null, new Uint8Array(raw[0].bytes))
   );
@@ -65,7 +69,7 @@ const onWebRequestBeforeRequest = (details) => {
       details.requestId,
       details.method,
       details.url,
-      details.timeStamp,
+      details.timeStamp / 1000,
       body
     )
   );
@@ -84,7 +88,9 @@ const onWebRequestBeforeSendHeaders = (details): void | BlockingResponse => {
   }
 };
 
-const onWebRequestCompleted = async (details) => {
+const onWebRequestCompleted = async (
+  details: chrome.webRequest.WebResponseCacheDetails
+) => {
   try {
     //console.log("worker onCompleted");
     if (!bufferRequests.has(details.requestId)) {
@@ -100,9 +106,9 @@ const onWebRequestCompleted = async (details) => {
     const requestLog = bufferRequests.get(details.requestId);
     requestLog.onComplete(
       details.statusCode,
-      details.responseText,
+      "",
       details.responseHeaders,
-      details.timeStamp,
+      details.timeStamp / 1000,
       xDebugData
     );
     //console.log("worker onCompleted sent");
@@ -155,7 +161,6 @@ const loadOptionsValues = () => {
   ]).then(([xDebugToken, xDebugTokenLink]: [string, string]) => {
     state.xDebugTokenHeader = xDebugToken;
     state.xDebugTokenLinkHeader = xDebugTokenLink;
-    console.log(state);
     activateListeners(true);
   });
 };
@@ -173,6 +178,18 @@ const initBackground = () => {
     return state.listenersStarted;
   });
 
+  onMessage("getDefaultProfilerTab", async (): Promise<string> => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return storageGetItem(storageKeys.profilerTab);
+  });
+
+  onMessage("setDefaultProfilerTab", async (message): Promise<string> => {
+    return storageSetItem(storageKeys.profilerTab, message.data.tab).then(
+      () => message.data.tab
+    );
+  });
+
   onMessage("clear", () => {
     logs.clear();
     updateBadgeIcon();
@@ -186,7 +203,7 @@ const initBackground = () => {
     activateListeners(false);
   });
 
-  console.log("background loaded");
+  console.log("Background loaded");
 };
 
 initBackground();

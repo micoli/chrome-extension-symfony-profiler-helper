@@ -6,8 +6,8 @@ export interface XDebugData {
 }
 
 export interface RequestBody {
-  formData: any | null;
-  raw: any | null;
+  formData: never | null;
+  raw: never | null;
 }
 
 export interface GenericRequestLog {

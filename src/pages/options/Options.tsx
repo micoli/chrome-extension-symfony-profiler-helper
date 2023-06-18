@@ -6,34 +6,18 @@ import {
   AppShell,
   Box,
   Button,
-  Checkbox,
   Code,
-  Group,
-  JsonInput,
   Select,
   Text,
   TextInput,
-  Tooltip,
 } from "@mantine/core";
-import { sendMessage, onMessage } from "../shared/messaging";
-import { localExtStorage } from "@webext-core/storage";
-import { useForm } from "@mantine/form";
+import { sendMessage } from "../shared/messaging";
 import { profilerTabs } from "@pages/shared/Profiler";
 import {
   storageGetItem,
   storageKeys,
   storageSetItem,
 } from "@pages/shared/storage";
-
-const isJson = (str: string) => {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-
-  return true;
-};
 
 const Options = () => {
   const [profilerTab, setProfilerTab] = useState<string>();
@@ -51,9 +35,7 @@ const Options = () => {
   }, []);
 
   const setDefaultValues = () => {
-    for (const [key, [storageKey, defaultValue]] of Object.entries(
-      storageKeys
-    )) {
+    for (const [, [storageKey, defaultValue]] of Object.entries(storageKeys)) {
       storageSetItem(storageKeys[storageKey], defaultValue);
     }
     initValues();

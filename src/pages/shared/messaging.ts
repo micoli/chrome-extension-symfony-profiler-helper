@@ -15,6 +15,10 @@ interface ProtocolMap {
   startListeners(): void;
 
   stopListeners(): void;
+
+  getDefaultProfilerTab(): string;
+
+  setDefaultProfilerTab(string): string;
 }
 
 export const { sendMessage, onMessage } =

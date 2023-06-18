@@ -1,7 +1,7 @@
 try {
   chrome.devtools.panels.create(
-    "Dev Tools",
-    "icon-34.png",
+    "Symfony Helper",
+    "symfony-color-48.png",
     "src/pages/panel/index.html"
   );
 } catch (e) {
