@@ -15,17 +15,7 @@ const manifest: chrome.runtime.ManifestV3 = {
     "128": "symfony-color-128.png",
   },
 
-  permissions: [
-    "webRequest",
-    "activeTab",
-    "tabs",
-    "webRequest",
-    "webNavigation",
-    "nativeMessaging",
-    "management",
-    "scripting",
-    "storage",
-  ],
+  permissions: ["webRequest", "storage"],
   action: {
     default_popup: "src/pages/popup/index.html",
     default_icon: "symfony-color-48.png",

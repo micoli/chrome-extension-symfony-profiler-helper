@@ -1,8 +1,8 @@
 <div align="center">
-<img src="public/icon-128.png" alt="logo"/>
+<img src="public/symfony-color-128.png" alt="logo"/>
 </div>
 
-# Chrome Extension symfony profiler
+# Symfony Profiler Chrome Extension
 
 ## Table of Contents
 
@@ -10,25 +10,22 @@
 - [Features](#features)
 - [Installation](#installation)
   - [Procedures](#procedures)
-- [Screenshots](#screenshots)
-  - [NewTab](#newtab)
-  - [Popup](#popup)  
+- [Usefull links](#links)
+- [Tools](#tools)
 
 ## Intro <a name="intro"></a>
-This boilerplate is made for creating chrome extensions using React and Typescript.
-> The focus was on improving the build speed and development experience with Vite.
+
+This chrome extension is here to help symfony developers during their development experience. It list all symfony http call(doc/httpRequest), and provides details and direct links to them. 
+
 
 ## Features <a name="features"></a>
-- [React 18](https://reactjs.org/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Jest](https://jestjs.io/)
-- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
-- [Vite](https://vitejs.dev/)
-- [SASS](https://sass-lang.com/)
-- [ESLint](https://eslint.org/)
-- [Prettier](https://prettier.io/)
-- [Chrome Extension Manifest Version 3](https://developer.chrome.com/docs/extensions/mv3/intro/)
-- HRR(Hot Rebuild & Refresh/Reload)
+
+- copy to clipboard as cUrl accessible through a simple button
+- details request body/payload
+- details request headers
+- details response headers
+- link to request profiler page
+
 
 ## Installation <a name="installation"></a>
 
@@ -46,16 +43,29 @@ This boilerplate is made for creating chrome extensions using React and Typescri
 6. If you want to build in production, Just run `yarn build` or `npm run build`.
 
 
+## Usefull links <a name="links"></a>
+
 - chrome://inspect/#service-workers
 - chrome://extensions/
 
----
+
+## Tools <a name="tools"></a>
+
+- [React 18](https://reactjs.org/)
+- [React 18](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Jest](https://jestjs.io/)
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [Vite](https://vitejs.dev/)
+- [SASS](https://sass-lang.com/)
+- [ESLint](https://eslint.org/)
+- [Prettier](https://prettier.io/)
+- [Chrome Extension Manifest Version 3](https://developer.chrome.com/docs/extensions/mv3/intro/)
+- HRR (Hot Rebuild & Refresh/Reload)
+
 ## Thanks To
-| [Jetbrains](https://jb.gg/OpenSourceSupport) | [Jackson Hong](https://www.linkedin.com/in/j-acks0n/)  |
-|----------------------------------------------|--------------------------------------------------------|
-| [xxx]       | [Jonghakseo](https://nookpi.tistory.com/)                                               |
-
-
----
-
+ - [Jetbrains](https://jb.gg/OpenSourceSupport)
+   - [Jackson Hong](https://www.linkedin.com/in/j-acks0n/)
+ - [Jonghakseo's github](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite)
+   - [Jonghakseo](https://nookpi.tistory.com/)
 
