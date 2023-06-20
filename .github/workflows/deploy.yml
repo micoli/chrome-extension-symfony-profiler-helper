@@ -42,9 +42,9 @@ jobs:
 
       - name: build
         id: build
-        run: yarn build
-        with:
-          tag_name: ${{ steps.taggerDryRun.outputs.new_tag }}
+        run: |
+          export tag_name="${{ steps.taggerDryRun.outputs.new_tag }}"
+          yarn build
 
       - name: Display manifest
         run: cat dist/manifest.json
