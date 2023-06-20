@@ -41,6 +41,8 @@ jobs:
           VERBOSE: true
 
       - run: yarn build
+        with:
+          tag_name: ${{ steps.version.outputs.TAG_NAME }}
 
       - name: Display manifest
         run: cat dist/manifest.json
