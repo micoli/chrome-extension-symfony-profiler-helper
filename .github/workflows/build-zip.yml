@@ -62,7 +62,7 @@ jobs:
         uses: mnao305/chrome-extension-upload@v4.0.1
         with:
           file-path: dist/extension.zip
-          extension-id: kigfhmdgkamadogcdmggflaccaonlnjm
+          extension-id: kgbclpndllpkdhmeihpfbfehkdbpnlfh
           client-id: ${{ secrets.PUBLISH_CLIENT_ID }}
           client-secret: ${{ secrets.PUBLISH_CLIENT_SECRET }}
           refresh-token: ${{ secrets.PUBLISH_REFRESH_TOKEN }}
