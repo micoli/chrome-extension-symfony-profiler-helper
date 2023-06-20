@@ -7,7 +7,7 @@ import * as process from "process";
 const manifest: chrome.runtime.ManifestV3 = {
   manifest_version: 3,
   name: packageJson.name,
-  version: process.env["tag_name"] || packageJson.version,
+  version: (process.env["tag_name"] || packageJson.version).replace(/^v/, ""),
   description: packageJson.description,
   icons: {
     "48": "symfony-color-48.png",
