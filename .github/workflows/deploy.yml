@@ -17,16 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Minor version for each merge
-        id: taggerDryRun
-        uses: anothrNick/github-tag-action@1.36.0
-        env:
-          DRY_RUN: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BRANCH: main
-          WITH_V: true
-          VERBOSE: true
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -39,7 +29,22 @@ jobs:
 
       - run: yarn install
 
+      - name: Patch version for each merge dry run
+        id: taggerDryRun
+        uses: anothrNick/github-tag-action@1.36.0
+        env:
+          DRY_RUN: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BRANCH: main
+          DEFAULT_BUMP: patch
+          WITH_V: true
+          VERBOSE: true
+
       - run: yarn build
+
+      - name: Display manifest
+        run: cat dist/manifest.json
+        shell: bash
 
       - run: yarn run build:extension
 
@@ -49,19 +54,16 @@ jobs:
           name: extension.zip
           if-no-files-found: error
 
-      - name: Minor version for each merge on master
+      - name: Patch version for each merge real
         id: taggerFinal
         uses: anothrNick/github-tag-action@1.36.0
         env:
           DRY_RUN: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: main
+          DEFAULT_BUMP: patch
           WITH_V: true
           VERBOSE: true
-
-      - name: Display manifest
-        run: cat dist/manifest.json
-        shell: bash
 
       - name: Upload & release
         uses: mnao305/chrome-extension-upload@v4.0.1
