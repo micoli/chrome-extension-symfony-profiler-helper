@@ -1,9 +1,11 @@
 import { localExtStorage } from "@webext-core/storage";
 
-const storageKeys: { [key: string]: [string, string] } = {
+const storageKeys: { [key: string]: [string, string | boolean] } = {
   profilerTab: ["profilerTab", "db"],
+  autoloadMetricTab: ["autoloadMetricTab", "db"],
   xDebugToken: ["xDebugToken", "x-debug-token"],
   xDebugTokenLink: ["xDebugTokenLink", "x-debug-token-link"],
+  decodeBodyAndResponse: ["decodeBodyAndResponse", true],
 };
 
 const storageGetItem = async ([key, defaultValue]) => {
@@ -15,8 +17,7 @@ const storageGetItem = async ([key, defaultValue]) => {
   });
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const storageSetItem = async ([key, defaultValue], value) => {
+const storageSetItem = async ([key, _defaultValue], value) => {
   return new Promise((resolve, reject) => {
     localExtStorage
       .setItem(key, value)

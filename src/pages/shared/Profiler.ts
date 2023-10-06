@@ -21,4 +21,13 @@ const profilerTabs = [
   ["validator", "Validator"],
 ];
 
-export { profilerTabs };
+const profilerMetrics: [string, string, string, number | null][] = [
+  ["db", "Database", "metrics", null],
+  ["cache", "Cache", "metrics", 8],
+  ["events", "Events", "tabs", null],
+  ["messenger", "Messenger", "tabs", null],
+  ["router", "Router", "metrics", null],
+  ["time", "Performance", "metrics", null],
+];
+
+export { profilerTabs, profilerMetrics };
