@@ -6,13 +6,14 @@ import {
   AppShell,
   Box,
   Button,
+  Checkbox,
   Code,
   Select,
   Text,
   TextInput,
 } from "@mantine/core";
 import { sendMessage } from "../shared/messaging";
-import { profilerTabs } from "@pages/shared/Profiler";
+import { profilerTabs, profilerMetrics } from "@pages/shared/Profiler";
 import {
   storageGetItem,
   storageKeys,
@@ -21,13 +22,19 @@ import {
 
 const Options = () => {
   const [profilerTab, setProfilerTab] = useState<string>();
+  const [autoloadMetricTab, setAutoloadMetricTab] = useState<string>();
   const [xDebugToken, setXDebugToken] = useState<string>();
   const [xDebugTokenLink, setXDebugTokenLink] = useState<string>();
+  const [decodeBodyAndResponse, setDecodeBodyAndResponse] = useState<boolean>();
 
   const initValues = () => {
     storageGetItem(storageKeys.profilerTab).then(setProfilerTab);
+    storageGetItem(storageKeys.autoloadMetricTab).then(setAutoloadMetricTab);
     storageGetItem(storageKeys.xDebugToken).then(setXDebugToken);
     storageGetItem(storageKeys.xDebugTokenLink).then(setXDebugTokenLink);
+    storageGetItem(storageKeys.decodeBodyAndResponse).then(
+      setDecodeBodyAndResponse
+    );
   };
 
   useEffect(() => {
@@ -58,6 +65,22 @@ const Options = () => {
             label,
           }))}
         />
+        <Select
+          label={"Default autoload metrics tab"}
+          placeholder="Pick one"
+          value={autoloadMetricTab}
+          onChange={(value) => {
+            storageSetItem(storageKeys.autoloadMetricTab, value)
+              .then(setAutoloadMetricTab)
+              .then(() => sendMessage("optionsSetEvent", null));
+          }}
+          data={[{ value: "null", label: "-None-" }].concat(
+            profilerMetrics.map(([value, label]) => ({
+              value,
+              label,
+            }))
+          )}
+        />
         <TextInput
           label={"xDebugToken header name"}
           value={xDebugToken}
@@ -79,6 +102,18 @@ const Options = () => {
               event.currentTarget.value.toLowerCase()
             )
               .then(setXDebugTokenLink)
+              .then(() => sendMessage("optionsSetEvent", null))
+          }
+        />
+        <Checkbox
+          label={"Decode payload body and response"}
+          checked={decodeBodyAndResponse}
+          onChange={(event) =>
+            storageSetItem(
+              storageKeys.decodeBodyAndResponse,
+              event.currentTarget.checked
+            )
+              .then(setDecodeBodyAndResponse)
               .then(() => sendMessage("optionsSetEvent", null))
           }
         />

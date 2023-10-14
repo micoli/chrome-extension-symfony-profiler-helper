@@ -2,6 +2,7 @@ import React, { MouseEvent } from "react";
 import { useEffect, useState } from "react";
 import "@pages/popup/Popup.css";
 import "react-json-pretty/themes/monikai.css";
+import { generateColors } from "@mantine/colors-generator";
 import {
   ActionIcon,
   AppShell,
@@ -17,10 +18,14 @@ import { sendMessage, onMessage } from "../messaging";
 import { CurlGenerator } from "curl-generator";
 import { useClipboard } from "@mantine/hooks";
 import {
+  IconChevronDown,
+  IconChevronRight,
   IconClipboardCopy,
+  IconGraph,
   IconPlayerPause,
   IconPlayerRecord,
   IconRefresh,
+  IconSolarPanel,
   IconTrashX,
 } from "@tabler/icons-react";
 import { DataTable } from "mantine-datatable";
@@ -31,7 +36,7 @@ import {
 } from "@pages/shared/LogList/HttpStatusColor";
 import ExpandedRow from "@pages/shared/LogList/ExpandedRow";
 import ToolBar from "@pages/shared/LogList/ToolBar";
-import { profilerTabs } from "@pages/shared/Profiler";
+import { profilerMetrics, profilerTabs } from "@pages/shared/Profiler";
 import ToolBarIcon from "@pages/shared/LogList/ToolBarIcon";
 
 const transformToSearchableRequestLog = (
@@ -47,19 +52,29 @@ const transformToSearchableRequestLog = (
 const LogList = ({ height }: { height: string | number }) => {
   const clipboard = useClipboard({ timeout: 500 });
   const [profilerTab, setProfilerTab] = useState("db");
+  const [autoloadMetricTab, setAutoloadMetricTab] = useState("db");
   const [filter, setFilter] = useState("");
   const [listenersStatus, setListenersStatus] = useState(false);
   const [requestLogs, setRequestLogs] = useState<SearchableRequestLog[]>([]);
+  const [expandedRecordIds, setExpandedRecordIds] = useState<string[]>([]);
 
   useEffect(() => {
     onMessage("newRequestEvent", (message) => {
-      setRequestLogs((previousLogs) => [
-        transformToSearchableRequestLog(message.data),
-        ...previousLogs,
-      ]);
+      console.log(message.data.requestId);
+      setRequestLogs((previousLogs) =>
+        [
+          transformToSearchableRequestLog(message.data),
+          ...previousLogs.filter(
+            (record) => record.requestId !== message.data.requestId
+          ),
+        ].sort((recordA, recordB) =>
+          recordA.timestampStart < recordB.timestampStart ? 1 : -1
+        )
+      );
     });
     refresh().then();
     sendMessage("getDefaultProfilerTab", null).then(setProfilerTab);
+    sendMessage("getAutoloadMetricTab", null).then(setAutoloadMetricTab);
     sendMessage("getListenersStatus", null).then(setListenersStatus);
   }, []);
 
@@ -86,58 +101,129 @@ const LogList = ({ height }: { height: string | number }) => {
     window.open(`${xDebugData.link}?panel=${profilerTab}`, "_blank");
   };
 
+  const onClickRender = (requestLog: SearchableRequestLog) => (
+    <Group spacing={2} position="right" noWrap>
+      <ActionIcon
+        title={"copy as cUrl"}
+        color="green"
+        onClick={(event: MouseEvent) => {
+          event.preventDefault();
+          event.stopPropagation();
+          clipboard.copy(
+            CurlGenerator({
+              url: `"${requestLog.url.replace('"', '\\"')}"`,
+              method: requestLog.method,
+              body: requestLog.body,
+              headers: requestLog.requestHeaders.reduce((obj, item) => {
+                return {
+                  ...obj,
+                  [item.name]: item.value,
+                };
+              }, {}),
+            })
+          );
+        }}
+      >
+        <IconClipboardCopy size={16} />
+      </ActionIcon>
+    </Group>
+  );
+
   return (
     <AppShell
       padding={"xs"}
       header={
         <ToolBar>
-          <TextInput
-            placeholder="filter"
-            value={filter}
-            size={"xs"}
-            variant={"unstyled"}
-            onChange={(event) =>
-              setFilter((event.currentTarget.value ?? "").toLowerCase())
-            }
-          />
           <ToolBarIcon
             title="Record"
             disabled={listenersStatus}
             onClick={startListener}
-            icon={<IconPlayerRecord />}
+            icon={<IconPlayerRecord size={20} />}
           />
           <ToolBarIcon
             title="Stop"
             disabled={!listenersStatus}
             onClick={stopListener}
-            icon={<IconPlayerPause />}
+            icon={<IconPlayerPause size={20} />}
           />
-          <Select
-            placeholder="Pick one"
-            value={profilerTab}
-            size={"xs"}
-            variant={"unstyled"}
-            onChange={(tab) => {
-              sendMessage("setDefaultProfilerTab", { tab }).then(
-                setProfilerTab
-              );
-            }}
-            data={profilerTabs.map(([value, label]) => ({
-              value,
-              label,
-            }))}
-          />
+          <div style={{ width: 100 }}>
+            <TextInput
+              placeholder="filter"
+              value={filter}
+              size={"xs"}
+              variant={"unstyled"}
+              onChange={(event) =>
+                setFilter((event.currentTarget.value ?? "").toLowerCase())
+              }
+            />
+          </div>
+          <Tooltip label={"Opened profiler panel on click"}>
+            <IconSolarPanel size={20} />
+          </Tooltip>
+          <Box pos="relative">
+            <Select
+              placeholder="Pick one"
+              value={profilerTab}
+              w={100}
+              sx={{
+                ".mantine-Select-dropdown": {
+                  width: "250px !important",
+                  left: "0 !important",
+                },
+              }}
+              size={"xs"}
+              variant={"unstyled"}
+              onChange={(tab) => {
+                sendMessage("setDefaultProfilerTab", { tab }).then(
+                  setProfilerTab
+                );
+              }}
+              data={profilerTabs.map(([value, label]) => ({
+                value,
+                label,
+              }))}
+            />
+          </Box>
+          <Tooltip label={"Collected metric"}>
+            <IconGraph size={20} />
+          </Tooltip>
+          <Box pos="relative">
+            <Select
+              placeholder="Pick one"
+              value={autoloadMetricTab}
+              size={"xs"}
+              variant={"unstyled"}
+              w={100}
+              sx={{
+                ".mantine-Select-dropdown": {
+                  width: "200px !important",
+                  left: "0 !important",
+                },
+              }}
+              onChange={(tab) => {
+                sendMessage("setAutoloadMetricTab", { tab })
+                  .then(setAutoloadMetricTab)
+                  .then(() => sendMessage("optionsSetEvent", null));
+              }}
+              data={[{ value: "null", label: "-None-" }].concat(
+                profilerMetrics.map(([value, label]) => ({
+                  value,
+                  label,
+                }))
+              )}
+            />
+          </Box>
           <ToolBarIcon
             title={"Clear"}
             disabled={requestLogs.length === 0}
             onClick={clearLogs}
-            icon={<IconTrashX />}
+            icon={<IconTrashX size={20} />}
           />
           <ToolBarIcon
             title="Refresh"
             disabled={false}
             onClick={refresh}
-            icon={<IconRefresh />}
+            icon={<IconRefresh size={20} />}
           />
         </ToolBar>
       }
@@ -158,15 +244,23 @@ const LogList = ({ height }: { height: string | number }) => {
         noHeader
         idAccessor={"requestId"}
         columns={[
-          // {
-          //   accessor: "requestId",
-          //   title: null,
-          //   width: 55,
-          // },
           {
             accessor: "method",
             title: null,
-            width: 60,
+            width: 70,
+            render: ({ method, requestId }) => {
+              return (
+                <Text size="xs">
+                  {method.substring(0, 4)}
+                  &nbsp;
+                  {expandedRecordIds.includes(requestId) ? (
+                    <IconChevronDown width={12} height={12} />
+                  ) : (
+                    <IconChevronRight width={12} height={12} />
+                  )}
+                </Text>
+              );
+            },
           },
           {
             accessor: "status",
@@ -197,9 +291,31 @@ const LogList = ({ height }: { height: string | number }) => {
             accessor: "url",
             title: "Url",
             render: ({ xDebugData, url }) => (
-              <Text onClick={() => openProfiler(xDebugData)}>
-                <Ellipsis text={url} max={45} minimumPrefix={10} />
-              </Text>
+              <>
+                <Text size="xs" onClick={() => openProfiler(xDebugData)}>
+                  <Ellipsis text={url} max={50} minimumPrefix={10} />
+                  <Text align={"right"}>
+                    {xDebugData.metadata.map((metric, index) => {
+                      return (
+                        <Tooltip
+                          key={`${metric.label}-${metric.value}`}
+                          label={metric.label}
+                        >
+                          <span>
+                            <Text
+                              component="span"
+                              color={generateColors("#931D1D")[index % 10]}
+                            >
+                              {metric.value}
+                            </Text>
+                            {index < xDebugData.metadata.length - 1 && ", "}
+                          </span>
+                        </Tooltip>
+                      );
+                    })}
+                  </Text>
+                </Text>
+              </>
             ),
           },
           {
@@ -208,10 +324,13 @@ const LogList = ({ height }: { height: string | number }) => {
             width: 60,
             textAlignment: "right",
             render: ({ timestampEnd, timestampStart }) => {
-              const duration = Math.round(timestampEnd - timestampStart);
               return (
-                <Tooltip label={`${timestampEnd - timestampStart} ms`}>
-                  <Text>{duration}</Text>
+                <Tooltip
+                  label={`${(timestampEnd - timestampStart).toFixed(8)} ms`}
+                >
+                  <Text size={"xs"}>
+                    {(timestampEnd - timestampStart).toFixed(3)}
+                  </Text>
                 </Tooltip>
               );
             },
@@ -221,42 +340,16 @@ const LogList = ({ height }: { height: string | number }) => {
             title: null,
             width: 50,
             textAlignment: "right",
-            render: (requestLog) => (
-              <Group spacing={2} position="right" noWrap>
-                <ActionIcon
-                  title={"copy as cUrl"}
-                  color="green"
-                  onClick={(event: MouseEvent) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    clipboard.copy(
-                      CurlGenerator({
-                        url: `"${requestLog.url.replace('"', '\\"')}"`,
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        method: requestLog.method,
-                        body: requestLog.body,
-                        titles: requestLog.requestHeaders.reduce(
-                          (obj, item) => {
-                            return {
-                              ...obj,
-                              [item.name]: item.value,
-                            };
-                          },
-                          {}
-                        ),
-                      })
-                    );
-                  }}
-                >
-                  <IconClipboardCopy size={16} />
-                </ActionIcon>
-              </Group>
-            ),
+            render: onClickRender,
           },
         ]}
         rowExpansion={{
           content: ExpandedRow,
+          allowMultiple: true,
+          expanded: {
+            recordIds: expandedRecordIds,
+            onRecordIdsChange: setExpandedRecordIds,
+          },
         }}
       />
     </AppShell>

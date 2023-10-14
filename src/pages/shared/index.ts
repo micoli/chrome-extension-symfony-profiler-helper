@@ -3,6 +3,7 @@ import HttpHeader = chrome.webRequest.HttpHeader;
 export interface XDebugData {
   link: string;
   token: string;
+  metadata: { label: string; value: string }[];
 }
 
 export interface RequestBody {
@@ -10,9 +11,21 @@ export interface RequestBody {
   raw: never | null;
 }
 
+export type HttpMethod =
+  | "GET"
+  | "get"
+  | "POST"
+  | "post"
+  | "PUT"
+  | "put"
+  | "PATCH"
+  | "patch"
+  | "DELETE"
+  | "delete";
+
 export interface GenericRequestLog {
   requestId: string;
-  method: string;
+  method: HttpMethod;
   url: string;
   timestampStart: number;
   body: RequestBody;
@@ -30,7 +43,7 @@ export interface SearchableRequestLog extends GenericRequestLog {
 
 export class RequestLog implements GenericRequestLog {
   requestId: string;
-  method: string;
+  method: HttpMethod;
   url: string;
   timestampStart: number;
   body: RequestBody;

@@ -9,6 +9,7 @@ import {
   storageKeys,
   storageSetItem,
 } from "@pages/shared/storage";
+import { extractMetrics } from "@pages/background/extractMetrics";
 
 reloadOnUpdate("pages/background");
 
@@ -19,10 +20,12 @@ const state = {
   listenersStarted: true,
   xDebugTokenLinkHeader: "",
   xDebugTokenHeader: "",
+  autoloadMetricTab: null,
+  decodeBodyAndResponse: true,
 };
 
 const getDebugToken = (headers: HttpHeader[]): XDebugData | null => {
-  const result = { link: null, token: null };
+  const result = { link: null, token: null, metadata: [] };
   headers.forEach((header) => {
     switch (header.name.toLowerCase()) {
       case state.xDebugTokenLinkHeader:
@@ -57,12 +60,13 @@ const decodeRawBody = (raw): string =>
 const onWebRequestBeforeRequest = (details) => {
   const body = {
     formData: details.requestBody?.formData ?? null,
-    raw: details.requestBody?.raw
-      ? decodeRawBody(details.requestBody.raw)
-      : null,
+    raw: !state.decodeBodyAndResponse
+      ? { disabled: true }
+      : details.requestBody?.raw
+        ? decodeRawBody(details.requestBody.raw)
+        : null,
   };
 
-  // console.log("body", body);
   bufferRequests.set(
     details.requestId,
     new RequestLog(
@@ -111,10 +115,12 @@ const onWebRequestCompleted = async (
       details.timeStamp / 1000,
       xDebugData
     );
-    //console.log("worker onCompleted sent");
     bufferRequests.delete(details.requestId);
     logs.set(details.requestId, requestLog);
     updateBadgeIcon();
+    if (state.autoloadMetricTab !== "null") {
+      await extractMetrics(state.autoloadMetricTab, requestLog);
+    }
     sendMessage("newRequestEvent", requestLog).catch(() => {
       //console.log("Popup not available now");
     });
@@ -158,16 +164,28 @@ const loadOptionsValues = () => {
   Promise.all([
     storageGetItem(storageKeys.xDebugToken),
     storageGetItem(storageKeys.xDebugTokenLink),
-  ]).then(([xDebugToken, xDebugTokenLink]: [string, string]) => {
-    state.xDebugTokenHeader = xDebugToken;
-    state.xDebugTokenLinkHeader = xDebugTokenLink;
-    activateListeners(true);
-  });
+    storageGetItem(storageKeys.autoloadMetricTab),
+    storageGetItem(storageKeys.decodeBodyAndResponse),
+  ]).then(
+    ([xDebugToken, xDebugTokenLink, autoloadMetricTab, decodeBodyAndResponse]: [
+      string,
+      string,
+      string | null,
+      boolean | null
+    ]) => {
+      state.xDebugTokenHeader = xDebugToken;
+      state.xDebugTokenLinkHeader = xDebugTokenLink;
+      state.autoloadMetricTab = autoloadMetricTab;
+      state.decodeBodyAndResponse = decodeBodyAndResponse;
+      activateListeners(true);
+    }
+  );
 };
 
 const initBackground = () => {
   loadOptionsValues();
   onMessage("optionsSetEvent", (): void => {
+    console.log("optionsSetEvent");
     loadOptionsValues();
   });
   onMessage("getLogs", (): RequestLog[] => {
@@ -186,6 +204,18 @@ const initBackground = () => {
 
   onMessage("setDefaultProfilerTab", async (message): Promise<string> => {
     return storageSetItem(storageKeys.profilerTab, message.data.tab).then(
+      () => message.data.tab
+    );
+  });
+
+  onMessage("getAutoloadMetricTab", async (): Promise<string> => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return storageGetItem(storageKeys.autoloadMetricTab);
+  });
+
+  onMessage("setAutoloadMetricTab", async (message): Promise<string> => {
+    return storageSetItem(storageKeys.autoloadMetricTab, message.data.tab).then(
       () => message.data.tab
     );
   });

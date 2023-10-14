@@ -19,6 +19,10 @@ interface ProtocolMap {
   getDefaultProfilerTab(): string;
 
   setDefaultProfilerTab(string): string;
+
+  getAutoloadMetricTab(): string;
+
+  setAutoloadMetricTab(string): string;
 }
 
 export const { sendMessage, onMessage } =
