@@ -4353,10 +4353,10 @@ makeerror@1.0.12:
   dependencies:
     tmpl "1.0.5"
 
-mantine-datatable@^2.5.9:
-  version "2.5.9"
-  resolved "https://registry.yarnpkg.com/mantine-datatable/-/mantine-datatable-2.5.9.tgz#563c5a35c0121bdd25be091ad564c410d64b30ca"
-  integrity sha512-qSxmcsRayPN5HzTS/v4dE+mAo6BqeB27fJ9YS9im9hNg6LRIAE1/1seeDYFvbsFSEu0KLnTEZzo5NkigC9mDeQ==
+mantine-datatable@^6.0.7:
+  version "6.0.7"
+  resolved "https://registry.yarnpkg.com/mantine-datatable/-/mantine-datatable-6.0.7.tgz#1dbd9a72a37d7d3b409bc620d70d518af568b1ee"
+  integrity sha512-G2QlB7DXvq/pUJNjfPLwSg752Fj1vBm+UEeum10Ic0QlgMladmB0wibKDol6arXR/SVadpuoWiEVFrbj344hzw==
 
 mantine-react-table@^1.0.0-beta.8:
   version "1.0.0-beta.8"
