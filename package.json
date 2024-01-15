@@ -33,7 +33,7 @@
     "htmlparser2": "^9.0.0",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
-    "mantine-datatable": "^2.5.9",
+    "mantine-datatable": "^6.0.7",
     "mantine-react-table": "^1.0.0-beta.8",
     "moment": "^2.29.4",
     "react": "18.2.0",
